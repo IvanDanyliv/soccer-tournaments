@@ -1,0 +1,23 @@
+body {
+	background-image: url("../img/bg.jpg");
+	background-repeat: no-repeat;
+	background-size: 100% 100%;
+	background-attachment: fixed;
+}
+
+.container {
+	background-color: #fff;
+	width: 60%;
+	height: 100%;
+	border: 2px #000;
+	border-style: none solid;
+}
+
+.card {
+	box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)
+}
+
+.error {
+	color: red;
+	font-weight: bold;
+}
