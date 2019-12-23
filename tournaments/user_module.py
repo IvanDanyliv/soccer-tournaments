@@ -13,10 +13,12 @@ class UserModule:
 		user = None
 		tournaments = db.select_all_tournaments_data()
 		select_teams = db.select_teams
+		select_matches = db.select_matches
+		get_team_name = db.get_team_name
+
 		if 'email' in session:
 			user = db.select_user_data(db.get_user_id(session['email']))
-
-		return render_template('index.html', user = user, tournaments = tournaments, select_teams = select_teams)
+		return render_template('index.html', user = user, tournaments = tournaments, select_teams = select_teams, select_matches = select_matches, get_team_name = get_team_name)
 
 	def registration(self):
 		if 'email' in session:
@@ -71,7 +73,9 @@ class UserModule:
 		user = db.select_user_data(db.get_user_id(session['email']))
 		tournaments = db.select_tournaments(db.get_user_id(session['email']))
 		select_teams = db.select_teams
-		return render_template('user.html', user = user, tournaments = tournaments, select_teams = select_teams)
+		select_matches = db.select_matches
+		get_team_name = db.get_team_name
+		return render_template('user.html', user = user, tournaments = tournaments, select_teams = select_teams, select_matches = select_matches, get_team_name = get_team_name)
 
 	def update(self):
 		if request.method == 'POST':
@@ -129,9 +133,13 @@ class UserModule:
 		if request.method == 'POST':
 			name = request.form['name']
 			if name:
-				db.add_team(args[0], args[1], name)
-				flash('Team has been added')
-				return redirect(url_for('user'))
+				if not db.get_team_id(name):
+					db.add_team(args[0], args[1], name)
+					flash('Team has been added')
+					return redirect(url_for('user'))
+				else:
+					flash('Team name is exist')
+					return redirect(url_for('add_team'))
 			else:
 				flash("All inputs are required!")
 				return redirect(url_for('add_team'))
@@ -151,9 +159,11 @@ class UserModule:
 				flash("All inputs are required!")	
 				return redirect(url_for('edit_tournament'))
 		tournament = db.select_tournament(args[1])
-		user = db.select_user_data(db.get_user_id(session['email']))
 		select_teams = db.select_teams
-		return render_template('edit_tournament.html', user = user, args = args, tournament = tournament, select_teams = select_teams)
+		select_matches = db.select_matches
+		get_team_name = db.get_team_name
+		user = db.select_user_data(db.get_user_id(session['email']))
+		return render_template('edit_tournament.html', user = user, args = args, tournament = tournament, select_teams = select_teams, select_matches = select_matches, get_team_name = get_team_name)
 
 	def admin(self):
 		user = db.select_user_data(db.get_user_id(session['email']))
@@ -172,3 +182,24 @@ class UserModule:
 	def delete_tournament_admin(self, id):
 		db.delete_tournament(id)
 		return redirect(url_for('admin'))
+
+	def add_match(self, *args):
+		if request.method == 'POST':
+			team_home = request.form['team_home']
+			team_guest = request.form['team_guest']
+			tour = request.form['tour']
+
+			if team_home and team_guest and tour:
+				if team_home == team_guest:
+					flash('Team can not play with themself!')
+					return redirect(url_for('add_match', user_id = args[0], tournament_id = args[1]))
+				else:
+					db.add_match(args[1], db.get_team_id(team_home), db.get_team_id(team_guest), tour)
+					flash('Match added!')
+					return redirect(url_for('edit_tournament', user_id = args[0], tournament_id = args[1]))
+			else:
+				flash("All inputs are required!")	
+				return redirect(url_for('add_match', user_id = args[0], tournament_id = args[1]))
+		select_teams = db.select_teams
+		user = db.select_user_data(db.get_user_id(session['email']))
+		return render_template('add_match.html', user = user, args = args, select_teams = select_teams)

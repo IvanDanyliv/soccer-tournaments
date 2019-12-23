@@ -30,6 +30,7 @@ class Matches(db.Model):
 	tournament_id = db.Column(db.Integer, nullable = False)
 	team_home_id = db.Column(db.Integer, nullable = False)
 	team_guest_id = db.Column(db.Integer, nullable = False)
+	tour = db.Column(db.Integer, nullable = False)
 
 class DbModule:
 	def get_user_id(self, email):
@@ -115,3 +116,20 @@ class DbModule:
 		user = Users.query.filter_by(id = id).first()
 		user.admin = True
 		db.session.commit()
+
+	def get_team_id(self, name):
+		team = Teams.query.filter_by(name = name).first()
+		return team.id if team else None
+
+	def get_team_name(self, id):
+		team = Teams.query.filter_by(id = id).first()
+		return team.name
+		
+	def add_match(self, *args):
+		match = Matches(tournament_id = args[0], team_home_id = args[1], team_guest_id = args[2], tour = args[3])
+		db.session.add(match)
+		db.session.commit()
+
+	def select_matches(self, id):
+		matches = Matches.query.filter_by(tournament_id = id).all()
+		return matches

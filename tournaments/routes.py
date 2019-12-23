@@ -62,3 +62,7 @@ def delete_user_admin(user_id):
 @app.route('/delete_tournament_admin?<tournament_id>')
 def delete_tournament_admin(tournament_id):
 	return um.delete_tournament_admin(tournament_id)
+
+@app.route('/add_match?<user_id>?<tournament_id>', methods = ['POST', 'GET'])
+def add_match(user_id, tournament_id):
+	return um.add_match(user_id, tournament_id)
